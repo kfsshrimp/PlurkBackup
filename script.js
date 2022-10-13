@@ -84,12 +84,14 @@
                 `;
 
             },
-            ReplurkDivList:(data,user)=>{
+            ReplurkDivList:(data,friends)=>{
 
+
+                var user = Object.values(friends).find(v=>v.id===data.user_id);
                 
 
                 return `<div class="list">
-                    ${(user.id===99999)?data.handle:`${user.display_name}（${user.nick_name}）`}
+                    ${(data.user_id===99999)?data.handle:`${user.display_name}（${user.nick_name}）`}
                     <p/>
                     ${data.content}
 
@@ -203,7 +205,7 @@
                 ${plurk.content}
                 </div>
 
-                ${Object.values(Replurk.responses).map(data=>Ex.temp.ReplurkDivList(data,user)).join("")}
+                ${Object.values(Replurk.responses).map(data=>Ex.temp.ReplurkDivList(data,Replurk.friends)).join("")}
 
                 
                 </div>`;
