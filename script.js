@@ -1,5 +1,5 @@
 (()=>{
-    Ex = {
+    var Ex = {
         id:"PlurkBackup",
         config:{
             sort:{
@@ -381,7 +381,7 @@
             },
             BackList:()=>{
 
-                var back_list = Ex.flag.storage.plurk;
+                var back_list = Ex.flag.storage.plurk||{};
 
                 var html = ``;
 
