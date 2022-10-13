@@ -536,9 +536,11 @@
 
 
 
+                <button onclick="window.open('https://www.plurk.com/kfsshrimp4','_blank');">使用說明&問題回報</button>
                 <input type="file" id="File">
                 
             
+                
             </div>
 
             <div id="BackList">${Ex.func.BackList()}</div>
