@@ -1,6 +1,5 @@
 (()=>{
-    
-    var Ex = {
+    Ex = {
         id:"PlurkBackup",
         config:{
             sort:{
@@ -50,7 +49,8 @@
                 xml:`系統今日已達查詢上限,請明日再查詢`,
                 time_range_err:`開始時間不可大於結果時間`,
                 time_range_err2:`搜尋範圍不可大於31天`
-            }
+            },
+            storage:"local"
         },
         flag:{
             PageControl:{
@@ -61,178 +61,40 @@
             search_mode:"",
             fans_sort:"karma",
             sort_desc:true,
-            page:1,
-            local:{},
-            session:{}
+            page:1
         },
-        temp:{
-            Plurk:(data)=>{
+        temp:{ 
+            BackList:(plurk_id)=>{
 
-                var div = document.createElement("div");
+                var {plurk,user,Replurk} = Ex.flag.storage.plurk[plurk_id];
+                
 
-                div.innerHTML = `
-                <div class="PlurkDiv">
+                return `
                     <div>
-                        ${data.content}
-                        <hr>
-
-                        <div>
-                        【${data.no}】${Ex.func.PlurkDate(data.posted)} / 喜歡：<span class="fav">${data.favorite_count}</span> / 轉噗：<span class="rep">${data.replurkers_count}</span> / 回噗：<span class="rep">${data.response_count}</span> / <a href="https://www.plurk.com/p/${parseInt(data.plurk_id).toString(36)}" target="_blank">PLURK</a> / <a data-event="ClickEvent" data-plurk_id=${data.plurk_id} data-mode="TextPrint" id="TextPrint_${data.plurk_id}">複製</a>
-
+                        ${user.display_name}（${user.nick_name}）
+                        <div class="content">
+                        ${plurk.content}
                         </div>
 
-                    </div>
-                </div>`;
-
-                return div;
-            },
-            FanSort:()=>{
-                var div = document.createElement("div");
-
-                div.innerHTML = `
-                <div class="PlurkDiv">
-                    <div>
-                        排序：
                         
-                        <select id="fans_sort" data-mode="fans_sort" data-event="ChangeEvent">${Ex.func.SelectHtml(Ex.config.fans_sort,Ex.flag.fans_sort)}</select>
+                        <button data-plurk_id="${plurk.plurk_id}" data-mode="ShowReplurk">顯示回噗</button>
 
-                        <input type="button" data-mode="sort_desc" id="sort_desc" data-event="ClickEvent" value="排序倒反">
-
-
-
+                        <button data-plurk_id="${plurk.plurk_id}"  data-mode="BackUpDownLoad">下載記錄檔</button>
                     </div>
-                </div>`;
-
-                return div;
-            },
-            Fan:(data)=>{
-
-                var table = ``;
-
-                table += `
-                
-                    <tr>
-                        <td>
-                        <a target="_blank" href="https://www.plurk.com/${data.nick_name}">${data.display_name}</a> (${data.nick_name})
-                        </td>
-
-                        ${Object.keys(Ex.config.fans_sort).map((v)=>{
-
-                            var _return = `<td data-sort="${v}">`;
-
-                            if(data.karma>Ex.config.karma_limit)
-                            {
-                                if(v.indexOf("join_date")!==-1 || v.indexOf("posted")!==-1)
-                                {
-                                    if(Ex.func.JsonChild(data,v)===undefined)
-                                    {
-                                        if(data.Detail.privacy==="only_friends")
-                                            _return += `私密河道`;
-                                        else
-                                            _return += `未發噗`;
-                                        
-                                    }
-                                    else
-                                    {
-                                        _return += Ex.func.PlurkDate(Ex.func.JsonChild(data,v));
-                                    }
-                                }
-                                else
-                                {
-                                    _return +=  `${Ex.func.JsonChild(data,v)}`;
-                                }
-                            }
-                            else
-                            {
-                                _return += `卡瑪低於${Ex.config.karma_limit},略過`;
- 
-                                
-                            }
-                            
-                            _return += `</td>`;
-
-
-                            return _return;
-
-                        }).join("")}
-
-                    </tr>
-                
                 `;
 
-                return table;
-
-                var div = document.createElement("div");
-
-                div.innerHTML = `
-                <div class="PlurkDiv">
-                    <div>
-                    <a target="_blank" href="https://www.plurk.com/${data.nick_name}">${data.display_name}</a> (${data.nick_name})
-                    <hr>
-
-                    ${Object.keys(Ex.config.fans_sort).map((v)=>{
-
-                        var _return = `${Ex.config.fans_sort[v]}：`;
-
-                        if(data.karma>Ex.config.karma_limit)
-                        {
-                            if(v.indexOf("join_date")!==-1 || v.indexOf("posted")!==-1)
-                            {
-                                if(Ex.func.JsonChild(data,v)===undefined)
-                                {
-                                    if(data.Detail.plurks===undefined)
-                                    {
-                                        if(data.Detail.privacy==="only_friends")
-                                            _return += `私密河道`;
-                                        else
-                                            _return += `未發噗`;
-                                    }   
-                                }
-                                else
-                                {
-                                    _return += Ex.func.PlurkDate(Ex.func.JsonChild(data,v));
-                                }
-                            }
-                            else
-                            {
-                                _return +=  `${Ex.func.JsonChild(data,v)||''}`;
-                            }
-                        }
-                        else
-                        {
-                            _return += `卡瑪低於${Ex.config.karma_limit},略過讀取`;
-                        }
-                        
-
-
-                        _return += `<BR>`;
-
-
-                        return _return;
-
-                    }).join("")}
-
-                    <hr>
-                    
-
-
-                    </div>
-                </div>`;
-
-                return div;
             },
-            PageSelect:(total)=>{
-
-                var select = document.createElement("select");
-                select.dataset.mode = "PageChange";
-                select.dataset.event = "ChangeEvent";
-                select.id = "PageChange";
-
-                select.innerHTML = Ex.func.SelectHtml(total,Ex.flag.PageControl.page)
+            ReplurkDivList:(data,user)=>{
 
                 
-                return select;
 
+                return `<div class="list">
+                    ${(user.id===99999)?data.handle:`${user.display_name}（${user.nick_name}）`}
+                    <p/>
+                    ${data.content}
+
+                    </div>
+                `;
             }
         },
         func:{
@@ -280,77 +142,6 @@
                 
 
             },
-            PageChange:(path)=>{
-
-
-                
-                if(path==="next")
-                {
-                    Ex.flag.PageControl.page += 1;
-                }
-                else if(path==="prev")
-                {
-                    Ex.flag.PageControl.page -= 1;
-                }
-                else
-                {
-                    Ex.flag.PageControl.page = parseInt(path);
-                }
-
-
-                if(
-                    Ex.flag.PageControl.page>Math.ceil(Ex.flag.PageControl.total/Ex.config.page_per_count) || 
-                    Ex.flag.PageControl.page*Ex.config.page_per_count<=0) return;
-
-                
-                document.querySelector("#PlurkList").scrollTo(0,0);
-
-
-                (Ex.flag.PageControl.mode==="plurks")?Ex.func.PlurkList():Ex.func.FanList(Ex.flag.search_mode);
-
-
-            },
-            PageControl:( mode = "search_plurks" )=>{
-
-                var total = Ex.PlurkApi[`${mode}`].length;
-                
-                Ex.flag.PageControl = {
-                    mode:mode,
-                    total:Ex.PlurkApi[`${mode}`].length,
-                    page:Ex.flag.PageControl.page
-                };
-
-                Ex.func.DisabledBtn(`#PageBar [data-mode="PageChange"]`,true);
-
-
-                if( (Ex.flag.PageControl.page*1+1)<=Math.ceil(total/Ex.config.page_per_count) )
-                {
-
-                    Ex.func.DisabledBtn(`#PageBar [data-path="next"]`,false);
-                }
-
-                if( (Ex.flag.PageControl.page-1)*Ex.config.page_per_count>0)
-                {
-                    Ex.func.DisabledBtn(`#PageBar [data-path="prev"]`,false);
-                    
-                }
-
-                if(Ex.PlurkApi[mode].length<=Ex.config.page_per_count)
-                {
-
-                    Ex.func.DisabledBtn(`#PageBar [data-mode="PageChange"]`,true);
-                    
-                }
-
-                document.querySelector("#PageBar #page").innerHTML = ``;
-                document.querySelector("#PageBar #page").appendChild(Ex.temp.PageSelect(Math.ceil(Ex.flag.PageControl.total/Ex.config.page_per_count)));
-
-
-                Ex.func.ClickEvent();
-                Ex.func.ChangeEvent();
-
-
-            },
             PlurkTime:( func )=>{
 
                 var api = Ex.PlurkApi;
@@ -365,205 +156,6 @@
                 }
                 api.Send();
 
-            },
-            PlurkList:()=>{
-
-                var plurks = Ex.PlurkApi.plurks;
-
-                Ex.flag.ClickEventRegister = [];
-                Ex.flag.ChangeEventRegister = [];
-
-                document.querySelector("#PlurkList").innerHTML = ``;
-                
-                var start = ``,end = ``,p_start = ``,p_end = ``,
-                ymd = document.querySelectorAll(`select[data-mode="ymdchange"]`),
-                sort = document.querySelector(`select[data-mode="sort"]`),
-                porn = document.querySelector(`select[data-mode="porn"]`);
-
-
-                p_start = `${ymd[3].value}/${ymd[4].value}/${ymd[5].value}`;
-                p_end = `${ymd[0].value}/${ymd[1].value}/${ymd[2].value}`;
-
-                start = new Date(p_start);
-                end = new Date(p_end);
-
-                start = new Date( start.setDate( start.getDate()+1 ) )
-
-                var search_plurks = [];
-
-                
-                
-                for(var i in plurks)
-                {
-                    let data = plurks[i];
-
-                    
-                    if( 
-                        new Date(data.posted).toISOString() >= end.toISOString() && 
-                        new Date(data.posted).toISOString() <= start.toISOString() && 
-                        /*
-                        (
-                            new Date(data.posted).getFullYear()<=parseInt(ymd[3].value) && 
-                            new Date(data.posted).getFullYear().toString()>=parseInt(ymd[0].value)
-                        )
-                        &&
-                        (
-                            (new Date(data.posted).getMonth()+1)<=parseInt(ymd[4].value) && 
-                            (new Date(data.posted).getMonth()+1)>=parseInt(ymd[1].value)
-                        )
-                        &&
-                        (
-                            new Date(data.posted).getDate()<=parseInt(ymd[5].value) && 
-                            new Date(data.posted).getDate()>=parseInt(ymd[2].value)
-                        )
-                        */
-                        (
-                            porn.value===data.porn.toString() || 
-                            porn.value==="all"
-                        )
-                    )
-                    {
-                        search_plurks.push(data);
-                    }
-                }
-
-
-                console.log(search_plurks);
-
-                /*
-                if(sort.value==="favorite_count")
-                    search_plurks.sort( (a,b)=>{return (b.favorite_count!==a.favorite_count)?b.favorite_count - a.favorite_count:b.replurkers_count - a.replurkers_count});
-                else if(sort.value==="replurkers_count")
-                    search_plurks.sort( (a,b)=>{return (b.replurkers_count!==a.replurkers_count)?b.replurkers_count - a.replurkers_count:b.favorite_count - a.favorite_count});
-                */
-
-
-                search_plurks.sort( (a,b)=>{return b[sort.value] - a[sort.value]});
-
-
-
-
-                Ex.PlurkApi.search_plurks = search_plurks;
-
-                for(var i in search_plurks)
-                {
-                    let data = search_plurks[i];
-
-                    data.no = i*1+1;
-
-
-                    if( (Ex.flag.PageControl.page-1)*Ex.config.page_per_count>=data.no || Ex.flag.PageControl.page*Ex.config.page_per_count<data.no ) continue;
-
-                    document.querySelector("#PlurkList").appendChild(
-
-                        Ex.temp.Plurk(data)
-
-                    );
-                }
-                
-
-                document.querySelector("#Progress").innerHTML = Ex.config.msg.search_end(p_end,p_start,search_plurks.length,Ex.config.max-Ex.flag.NickNameCount);
-
-                Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`],false);
-
-
-                
-
-                Ex.func.PageControl();
-
-                
-
-            },
-            FanList:(mode)=>{
-
-                var fans = Ex.PlurkApi[mode];
-
-                Ex.flag.ClickEventRegister = [];
-                Ex.flag.ChangeEventRegister = [];
-
-                document.querySelector("#PlurkList").innerHTML = ``;
-                
-         
-                var search_fans = fans;
-
-               
-
-                
-                search_fans.sort( (a,b)=>{
-
-                    var _a = Ex.func.JsonChild(a,Ex.flag.fans_sort)||0,
-                    _b = Ex.func.JsonChild(b,Ex.flag.fans_sort)||0
-
-                    if(Ex.flag.fans_sort.indexOf("join_date")!==-1 || Ex.flag.fans_sort.indexOf("posted")!==-1)
-                    {
-                        _a = (_a===0)?new Date(0):new Date(_a);
-                        _b = (_b===0)?new Date(0):new Date(_b);
-                    }
-                    
-                    return (Ex.flag.sort_desc)?(_b - _a):(_a - _b);
-                    
-                });
-                
-
-
-                Ex.PlurkApi[mode] = search_fans;
-
-                document.querySelector("#PlurkList").appendChild(Ex.temp.FanSort());
-
-                var table = document.createElement("table");
-                table.id = "FanListTable";
-
-                table.innerHTML = `
-                <tr>
-                    <td>帳號</td>
-                    ${Object.keys(Ex.config.fans_sort).map((v)=>{
-    
-                        return `<td data-sort="${v}">${Ex.config.fans_sort[v]}</td>`;
-    
-                    }).join("")}
-                </tr>`;
-
-
-                for(var i in search_fans)
-                {
-                    let data = search_fans[i];
-
-                    data.no = i*1+1;
-
-                    if( (Ex.flag.PageControl.page-1)*Ex.config.page_per_count>=data.no || Ex.flag.PageControl.page*Ex.config.page_per_count<data.no ) continue;
-
-                    table.innerHTML += Ex.temp.Fan(data)
-
-                    document.querySelector("#PlurkList").appendChild(table);
-                }
-
-                Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`],false);
-
-
-
-                document.querySelectorAll(`td[data-sort="${Ex.flag.fans_sort}"]`).forEach(o=>{o.className = "SortNow";});
-                
-
-                Ex.func.PageControl(mode);
-
-
-            },
-            SelectYMD:(y,m,d)=>{
-
-                var y_select = ``,m_select = ``,d_select = ``;
-
-                for(var i=new Date().getFullYear()-10;i<=new Date().getFullYear();i++)
-                    y_select += `<option ${(i===new Date().getFullYear())?"selected":""}>${i}</option>`;
-
-                for(var i=1;i<=12;i++)
-                    m_select += `<option ${(i===(parseInt(m)||new Date().getMonth()+1))?"selected":""}>${i.toString().padStart(2,'0')}</option>`;
-
-
-                for(var i=1;i<=new Date( y||new Date().getFullYear() , m||(new Date().getMonth()+1) ,0).getDate();i++)
-                    d_select += `<option ${(i===(parseInt(d)||new Date().getDate()))?"selected":""}>${i.toString().padStart(2,'0')}</option>`;
-
-                
-                return {y:y_select,m:m_select,d:d_select}
             },
             SelectHtml:(obj,val)=>{
                 var html = ``;
@@ -593,548 +185,171 @@
                 });
 
             },
-            ChangeEvent:(e)=>{
-
-                if(e===undefined)
-                {
-                    document.querySelectorAll(`[data-event="ChangeEvent"]`).forEach(o=>{
-
-                        Ex.flag.ChangeEventRegister = Ex.flag.ChangeEventRegister||[];
-
-                        if(Ex.flag.ChangeEventRegister.indexOf(o.id)===-1)
-                        {
-                            //console.log('register ChangeEvent')
-                            Ex.flag.ChangeEventRegister.push(o.id);
-                            o.addEventListener("change",Ex.func.ChangeEvent);
-                        }
-                    });
+            ShowReplurk:(plurk,user,Replurk)=>{
 
 
-                    return;
-                }
-
-                switch (e.target.dataset.mode){
-
-                    case "ymdchange":
-                        var ymd = document.querySelectorAll(`[data-mode="ymdchange"][data-group="${e.target.dataset.group}"]`);
+                var ReplurkDiv = document.querySelector("#ReplurkDiv")||document.createElement("div");
+                ReplurkDiv.id = "ReplurkDiv";
 
 
-                        ymd[2].innerHTML = Ex.func.SelectYMD( ymd[0].value,ymd[1].value,1 ).d;
-                    break;
-
-                    case "PageChange":
-
-                        Ex.func.PageChange(e.target.value);
-
-                    break;
-
-                    case "sort":
-
-                        Ex.func.PlurkList();
-
-                    break;
-
-                    case "porn":
-
-                        Ex.func.PlurkList();
-
-                    break;
-
-                    case "fans_sort":
-
-                        Ex.flag.fans_sort = e.target.value;
 
 
-                        Ex.func.FanList(Ex.flag.search_mode);
+                ReplurkDiv.innerHTML = `
+                <button data-selector="#ReplurkDiv" data-mode="Close">關閉</button>
+                <div>
 
-                    break;
+                <div class="list">
+                ${user.display_name}（${user.nick_name}）<p/>
+                ${plurk.content}
+                </div>
 
-                }
+                ${Object.values(Replurk.responses).map(data=>Ex.temp.ReplurkDivList(data,user)).join("")}
 
-            },
-            UsersDetail:(nick_name,arg,func)=>{
-
-                var api = Ex.PlurkApi;
-
-                api.arg = arg;
-
-                api.act = "Profile/getPublicProfile";
-                api.arg.nick_name = "";
-                api.mode = "CORS";
-
-                api.arg.nick_name = nick_name;
-
-                api.func = (r)=>{
-                    try{
-                        r = JSON.parse(r.response);
-                        func(r);
-                    }
-                    catch(e){
-
-                        Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`],false);
-
-                        console.log("error");
-                        //console.log(e);
-                        return;
-                    }
-                }
-
-                api.Send();
-            },
-            FansDetail:(fans,i)=>{
-
-                var mode = Ex.flag.search_mode;
                 
-
-                if(fans[i]===undefined)
-                {
-
-                    Ex.DB.ref(`PlurkSearch/nick_name/${document.querySelector("#nick_name").value}/${Ex.flag.PlurkDay}/${mode}`).set(Ex.PlurkApi[mode]);
+                </div>`;
 
 
-                    Ex.func.FanList(mode);
-                    console.log(`【Get End】`);
-                    return;
-                }
+                document.body.appendChild(ReplurkDiv);
 
-             
-                if(fans[i].karma<Ex.config.karma_limit)
-                {
-                    setTimeout(()=>{
-
-                        i++;
-                        document.querySelector("#Progress").innerHTML = Ex.config.msg.search_fans_end(mode,i);
-
-                        document.querySelector("#Progress").style.background = `linear-gradient(to right, #0d0 ${i/Ex.PlurkApi[mode].length*100}% , #999 0%)`;
-
-
-                        Ex.func.FansDetail(fans,i);
-
-                    },0);
-
-                    return;
-                }
-
-                Ex.func.UsersDetail(fans[i].nick_name,{include_plurks:"true"},(r)=>{
-
-                    console.log(`Get ${fans[i].nick_name}`);
-
-                    (r.plurks.length>0)?r.plurks = [r.plurks.shift()]:null;
-
-                    fans[i].Detail = r;
-
-                    i++;
-
-                    document.querySelector("#Progress").innerHTML = Ex.config.msg.search_fans_end(mode,i);
-
-                    document.querySelector("#Progress").style.background = `linear-gradient(to right, #0d0 ${i/Ex.PlurkApi[mode].length*100}% , #999 0%)`;
-                    
-                    
-                    if(fans[i]!==undefined)
-                    {
-
-                        setTimeout(()=>{
-
-                            Ex.func.FansDetail(fans,i);
-
-                        },Ex.config.fans_cfg.fans_api_sec);
-                    }
-                    else
-                    {
-
-                        Ex.DB.ref(`PlurkSearch/nick_name/${document.querySelector("#nick_name").value}/${Ex.flag.PlurkDay}/${mode}`).set(Ex.PlurkApi[mode]);
-
-
-                        Ex.func.FanList(mode);
-                        console.log(`【Get End】`);
-                    }
-                    
-                });
-
-
-            },
-            GetFuns:(mode)=>{
-
-                Ex.func.UsersDetail( document.querySelector("#nick_name").value,{include_plurks:"false"},(user)=>{
-
-                    var api = Ex.PlurkApi;
-
-                  
-                    api.act = (mode.indexOf("Fans")!==-1)?"FriendsFans/getFansByOffset":"FriendsFans/getFriendsByOffset"
-
-                    api.arg.user_id = user.user_info.id;
-                    api.arg.offset = "0";
-                    api.arg.limit = "100";
-                    api.func = (r)=>{
-                    
-                        api[mode] = api[mode]||[];
-    
-                        try{
-                            r = JSON.parse(r.response);
-                        }
-                        catch(e){
-    
-                            console.log(e);
-                            return;
-                        }
-    
-                        api[mode] = api[mode].concat(r);
-
-                        
-
-    
-                        
-                        if(r.length===0)
-                        {
-                            document.querySelector("#Progress").innerHTML = Ex.config.msg.search_fans_end(mode,0);
-
-                            if(api[mode].length>Ex.config.fans_cfg.fans_count_max)
-                            {
-                                if(confirm(`粉絲或好友數過多，第一次讀取需要較長時間，確定要繼續嗎？`)===false){
-
-                                    Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`,`[data-mode="GetFriends"]`],false);
-                                    return;
-                                }
-                            }
-
-
-                            Ex.func.FansDetail(api[mode],0);
-    
-                            return;
-                        }
-    
-                        setTimeout(()=>{
-    
-                            api.arg.user_id = user.user_info.id;
-                            api.arg.limit = "100";
-                            api.arg.offset -= -1*r.length;
-                            
-                            api.Send();
-    
-                        },Ex.config.fans_cfg.fans_api_sec);
-    
-                    }
-                    
-                    api.Send();
-
-
-
-                });
 
             },
             ClickEvent:(e)=>{
 
-                if(e===undefined)
-                {
-                    document.querySelectorAll(`[data-event="ClickEvent"]`).forEach(o=>{
-
-                        Ex.flag.ClickEventRegister = Ex.flag.ClickEventRegister||[];
-
-                        if(Ex.flag.ClickEventRegister.indexOf(o.id)===-1)
-                        {
-                            //console.log('register ClickEvent')
-                            Ex.flag.ClickEventRegister.push(o.id);
-                            o.addEventListener("click",Ex.func.ClickEvent);
-                        }
-                    });
-
-
-                    return;
-                }
-
                 switch (e.target.dataset.mode){
 
+                    case "BackUp":
 
-                    case "GetFriends":
-                    case "GetFans":
+                        var plurk_url = document.querySelector("#plurk_url").value;
 
-                        var mode = e.target.dataset.mode;
-                        Ex.flag.search_mode = mode;
+                        var plurk_id =  parseInt(plurk_url.split("/").pop(),36);
 
-                        Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`,`[data-mode="GetFriends"]`],true);
 
-                        Ex.func.PlurkTime(()=>{
+                        var api = Ex.PlurkApi;
 
-                            Ex.DB.ref(`PlurkSearch/nick_name/${document.querySelector("#nick_name").value}`).once("value",r=>{
+                        api.act = "Timeline/getPlurk";
+                        api.arg.plurk_id = plurk_id;
 
-                                r = r.val()||{};
 
-                                r[Ex.flag.PlurkDay] = r[Ex.flag.PlurkDay]||{};
+                        api.func = (r)=>{
+
+                            try{
+                                r = JSON.parse(r.response);
+                            }catch(e){
+                                alert("輸入網址有誤");
+                                return;
+                            }
+
+                            
+                            
+                            Ex.flag.storage.plurk = Ex.flag.storage.plurk||{};
+                            Ex.flag.storage.plurk[ r.plurk.plurk_id ] = r;
+                            
+
+                            api.act = "Responses/get";
+                            api.arg.plurk_id = plurk_id;
+                            api.func = (r)=>{
+                                r = JSON.parse(r.response);
                                 
-
-
-                                for(var day in r)
-                                {
-                                    if(day===Ex.flag.PlurkDay) continue;
-
-                                    //r[day].search_fans = 1;
-                                    r[day][mode] = 1;
-                                }
+                                if(r.response_count===0) return;
                                 
+                                Ex.flag.storage.plurk[ r.responses[0].plurk_id ].Replurk = r;
 
-                                if(r[Ex.flag.PlurkDay][mode]!==undefined)
-                                {
-                                    Ex.PlurkApi[mode] = r[Ex.flag.PlurkDay][mode];
-                                    Ex.func.FanList(mode);
-                                }
-                                else
-                                {
-                                    Ex.func.GetFuns(mode);
-                                }
+                                Ex.func.StorageUpd();
 
-                                Ex.DB.ref(`PlurkSearch/nick_name/${document.querySelector("#nick_name").value}`).set(r);
+                                setTimeout(()=>{location.reload();},0);
+                            }
+                            api.Send();
 
-                            });
+                        }
+
+                        api.Send();
+
+                    break;
+
+                    case "BackUpDownLoad":
+
+                        var plurk = Ex.flag.storage.plurk[e.target.dataset.plurk_id];
+                        
+
+                        var file = new File(
+                            [ btoa(encodeURIComponent(JSON.stringify(plurk))) ],
+                            `噗浪純文字備份（${ parseInt(e.target.dataset.plurk_id).toString(36)}）.txt`,
+                            {
+                                type: 'text/plain',
+                            }
+                        )
+                          
+                        var link = document.createElement("a")
+                        var url = URL.createObjectURL(file)
+
+                        console.log(url);
+                        
+                        link.href = url
+                        link.download = file.name
+                        document.body.appendChild(link)
+                        link.click()
+                        
+                        document.body.removeChild(link)
+                        URL.revokeObjectURL(url)
+
+                    break;
+
+                    case "BackUpLoadFile":
+
+                        var reader = new FileReader();
+                        var file = document.querySelector("#File");
+                        file.addEventListener("change",r=>{
+
+                            console.log(r);
+
+                            reader.readAsText(r.target.files[0]);
 
                         });
-
-                    break;
-
-
-                    case "Search":
-                        
-                        Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`],true);
-
-
-                        var nick_name = document.querySelector("#nick_name").value;
-
-
-
-                        Ex.func.PlurkTime(()=>{
-
-                            var api = Ex.PlurkApi;
-
-
-                            api.plurks = [];
-                            document.querySelector("#PlurkList").innerHTML = ``;
-                            Ex.flag.PageControl.page = 1;
-                            
-
-
-                            var start = ``,end = ``,ymd = document.querySelectorAll(`select[data-mode="ymdchange"]`);
-
-                            start = `${ymd[3].value}/${ymd[4].value}/${ymd[5].value}`;
-                            end = `${ymd[0].value}/${ymd[1].value}/${ymd[2].value}`;
-
-                            if(nick_name==='')
-                            {
-                                alert(Ex.config.msg.nick_name_err);
-                                Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`],false);
+                        reader.onload = (r)=>{
+                            try{
+                                var {plurk,user,Replurk} = JSON.parse(decodeURIComponent(atob(r.target.result)));
+                            }catch(e){
+                                alert("檔案錯誤");
                                 return;
                             }
 
-                            if( new Date(start)<new Date(end) )
-                            {
-                                alert(Ex.config.msg.time_range_err);
-                                Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`],false);
-                                return;
-                            }
+                            Ex.func.ShowReplurk(plurk,user,Replurk);
+    
+                        }
 
+                        file.click();
 
-                            if( (((new Date(start) - new Date(end)) / 1000) / 60 / 60 / 24) >= 31 )
-                            {
-                                alert(Ex.config.msg.time_range_err2);
-                                Ex.func.DisabledBtn([`[data-mode="GetFans"]`,`[data-mode="Search"]`],false);
-                                return;
-                            }
-
-
-
-                            api.act = "Timeline/getPublicPlurks";
-                            api.arg.minimal_data = "true";
-                            api.arg.minimal_user = "true";
-                            api.arg.nick_name = document.querySelector("#nick_name").value;
-                            api.arg.limit = "100";
-                            api.arg.only_user = "true";
-                            api.mode = "CORS";
-
-                            start = new Date(start).setHours(24+8);
-                            end = new Date(end).setHours(8);
-
-
-                            api.arg.offset = new Date(start).toISOString();
-                            
-                            
-                            var safe = 0;
-                            api.func = (r)=>{ 
-
-                                api.plurks = api.plurks||[];
-        
-                                try{
-                                    r = JSON.parse(r.response);
-                                }
-                                catch(err){
-                                    console.log(end);
-                                    
-                                    Ex.func.PlurkList();
-
-                                    document.querySelector("#Progress").style.background = `linear-gradient(to right, #0d0 100% , #999 0%)`;
-
-                                    return;
-                                }
-        
-                                if(r.plurks.length===0)
-                                {
-                                    Ex.func.PlurkList();
-
-                                    document.querySelector("#Progress").style.background = `linear-gradient(to right, #0d0 100% , #999 0%)`;
-
-                                    return;
-                                }
-        
-                            
-                                api.plurks = api.plurks.concat(r.plurks);
-                            
-
-                                safe++;
-                                if(safe>Ex.config.loop_safe){console.log('loop_safe break');return;}
-                                
-                                
-                                
-                                var s = Math.floor(new Date(start).getTime()/1000/60/60/24);
-                                var e = Math.floor(new Date(end).getTime()/1000/60/60/24);
-                                var p = Math.floor(new Date(api.plurks[api.plurks.length-1].posted).getTime()/1000/60/60/24);
-
-                                var progress = Math.floor( ( s - e - (p - e) ) / ( s - e ) * 100 );
-
-
-                                document.querySelector("#Progress").innerHTML = Ex.config.msg.Progress(
-                                    progress,
-                                    new Date(api.plurks[api.plurks.length-1].posted).toISOString().split("T")[0]
-                                    );
-
-                                document.querySelector("#Progress").style.background = `linear-gradient(to right, #0d0 ${progress}% , #999 0%)`;
-
-
-
-
-                                if(new Date(api.plurks[api.plurks.length-1].posted).toISOString() >= new Date(end).toISOString())
-                                {
-                                    setTimeout(()=>{
-                                        
-                                        api.arg.offset = new Date( new Date(api.plurks[api.plurks.length-1].posted) ).toISOString();
-
-                                        Ex.func.DB(`PlurkSearch/nick_name/${nick_name}/${Ex.flag.PlurkDay}/search_count`,`add`,(r)=>{
-
-                                            r = r.val()||0;
-
-                                            Ex.flag.NickNameCount = r;
-
-                                            if(r>=Ex.config.max)
-                                            {
-                                                alert(Ex.config.msg.day_limit(nick_name));
-
-                                                Ex.func.PlurkList();
-
-
-                                                return;
-                                            }
-
-                                            Ex.func.DB(`PlurkSearch/XmlCount/${Ex.flag.PlurkDay}`,`add`,(r)=>{
-
-                                                r = r.val()||0;
-                
-                                                if(r>=Ex.config.XMLmax)
-                                                {
-                                                    alert(Ex.config.msg.xml);
-                                                    Ex.func.PlurkList();
-                
-                                                    
-                                                    return;
-                                                }
-                                                
-                
-                                                api.Send();
-                
-                                            });
-                
-                                        });                               
-                            
-                                    },Ex.config.loop_sec);
-                                }
-                                else
-                                {
-                                    Ex.func.PlurkList();
-                                    
-                                    document.querySelector(`[data-mode="Search"]`).removeAttribute("disabled");
-                                    document.querySelector(`[data-mode="GetFans"]`).removeAttribute("disabled");
-                                }    
-                            }
-
-
-                            
-
-                            Ex.func.DB(`PlurkSearch/nick_name/${nick_name}/${Ex.flag.PlurkDay}/search_count`,`add`,(r)=>{
-
-                                r = r.val()||0;
-
-                                Ex.flag.NickNameCount = r;
-
-                                if(r>=Ex.config.max)
-                                {
-                                    alert(Ex.config.msg.day_limit(nick_name));
-                                    Ex.func.PlurkList();
-
-                                    document.querySelector(`[data-mode="Search"]`).removeAttribute("disabled");
-                                    return;
-                                }
-
-                                Ex.func.DB(`PlurkSearch/SearchCount/${Ex.flag.PlurkDay}`,`add`);
-
-                                Ex.func.DB(`PlurkSearch/XmlCount/${Ex.flag.PlurkDay}`,`add`,(r)=>{
-
-                                    r = r.val()||0;
-
-                                    if(r>=Ex.config.XMLmax)
-                                    {
-                                        alert(Ex.config.msg.xml);
-                                        Ex.func.PlurkList();
-
-                                        document.querySelector(`[data-mode="Search"]`).removeAttribute("disabled");
-                                        return;
-                                    }
-
-
-                                    api.Send();
-
-                                });
-
-                            });
-                                
-
-
-                        });
-                    break;
-
-
-
-                    case "sort_desc":
-
-                        Ex.flag.sort_desc = !Ex.flag.sort_desc;
-                        Ex.func.FanList(Ex.flag.search_mode);
 
                     break;
 
-                    case "TextPrint":
-
-                        var plurk = Ex.PlurkApi.plurks.filter(o=>{
-                            if(o.plurk_id===parseInt(e.target.dataset.plurk_id)) return true;
-                        })[0];
+                    case "ShowReplurk":
 
 
+                        var {plurk,user,Replurk} = Ex.flag.storage.plurk[e.target.dataset.plurk_id];
 
-                        var text = `${plurk.content_raw}\nhttps://www.plurk.com/p/${parseInt(plurk.plurk_id).toString(36)}`;
+                        Ex.func.ShowReplurk(plurk,user,Replurk);
 
-                        navigator.clipboard.writeText(text);
-                        
+
+
                     break;
 
+                    case "ClearSave":
+
+                        Ex.flag.storage.plurk = {};
+
+                        Ex.func.StorageUpd();
+
+                        setTimeout(()=>{location.reload();},0);
+
+                    break;
+
+                    
 
 
-                    case "PageChange":
+                    case "Close":
 
-                        Ex.func.PageChange(e.target.dataset.path);
-                        
+                        document.querySelectorAll(e.target.dataset.selector).forEach(o=>o.remove());
+
                     break;
 
                 }
@@ -1160,10 +375,26 @@
 
                     break;
 
-
-
                 }
                 
+
+            },
+            BackList:()=>{
+
+                var back_list = Ex.flag.storage.plurk;
+
+                var html = ``;
+
+                Object.values(back_list).forEach(data=>{
+
+                    
+
+                    html += Ex.temp.BackList(data.plurk.plurk_id);
+
+
+                });
+
+                return html;
 
             },
             JsonChild:(obj,row)=>{
@@ -1186,8 +417,22 @@
 
             },
             StorageUpd:()=>{
-                localStorage[Ex.id] = JSON.stringify(Ex.flag.local);
-                sessionStorage[Ex.id] = JSON.stringify(Ex.flag.session);
+                
+                if(Ex.flag.local===undefined || Ex.flag.session===undefined)
+                {
+                    Ex.flag.local = JSON.parse(localStorage[Ex.id]||`{}`);
+                    Ex.flag.session = JSON.parse(sessionStorage[Ex.id]||`{}`);
+
+                    Ex.flag.storage = Ex.flag[Ex.config.storage];
+                }
+                else
+                {
+                    Ex.flag[Ex.config.storage] = Ex.flag.storage;
+
+                    localStorage[Ex.id] = JSON.stringify(Ex.flag.local);
+                    sessionStorage[Ex.id] = JSON.stringify(Ex.flag.session);
+                }
+
             },
             PlurkDate:(IOSDate)=>{
 
@@ -1255,9 +500,10 @@
         },
         init:()=>{
 
+            Ex.func.StorageUpd();
             
 
-            Ex.firebase("https://plurksearch-9f77d-default-rtdb.firebaseio.com/");
+            
 
 
             Ex.js(
@@ -1273,72 +519,40 @@
             )
 
 
-            Ex.flag.local = JSON.parse(localStorage[Ex.id]||`{}`);
-            Ex.flag.session = JSON.parse(sessionStorage[Ex.id]||`{}`);
-
-            Ex.func.StorageUpd();
             
             
 
 
             document.body.innerHTML = `
+
             <div id="SearchBar">
-            <input id="nick_name" value="${(location.hostname===``)?"kfsshrimp4":""}" type="text" placeholder="噗浪帳號">
+                <input id="plurk_url" type="text" placeholder="噗浪網址">
 
-            <select id="y_start" data-group="ymd_start" data-mode="ymdchange" data-event="ChangeEvent">${Ex.func.SelectYMD().y}</select>
-            <select id="m_start" data-group="ymd_start" data-mode="ymdchange" data-event="ChangeEvent">${Ex.func.SelectYMD().m}</select>
-            <select id="d_start" data-group="ymd_start" data-mode="ymdchange">${Ex.func.SelectYMD().d}</select>
-            ~
-            <select id="y_end" data-group="ymd_end" data-mode="ymdchange" data-event="ChangeEvent">${Ex.func.SelectYMD().y}</select>
-            <select id="m_end" data-group="ymd_end" data-mode="ymdchange" data-event="ChangeEvent">${Ex.func.SelectYMD().m}</select>
-            <select id="d_end" data-group="ymd_end" data-mode="ymdchange">${Ex.func.SelectYMD().d}</select>
 
-            <select id="sort" data-mode="sort" data-event="ChangeEvent">${Ex.func.SelectHtml(Ex.config.sort)}</select>
-            <select id="porn" data-mode="porn" data-event="ChangeEvent">${Ex.func.SelectHtml(Ex.config.porn)}</select>
+                <button data-mode="BackUp">備份</button>
+                <button data-mode="ClearSave">清除記錄</button>
 
-            <input data-event="ClickEvent" data-mode="Search" id="Search" type="button" value="搜尋">
+                <button data-mode="BackUpLoadFile">檔案載入記錄</button>
 
-            <input data-event="ClickEvent" data-mode="GetFans" id="GetFans" type="button" value="粉絲清單">
 
-            <input data-event="ClickEvent" data-mode="GetFriends" id="GetFriends" type="button" value="好友清單">
 
-            <!--
-            <input data-event="ClickEvent" data-mode="TextPrint" id="TextPrint" type="button" value="快速顯示">
-            -->
+                <input type="file" id="File">
+                
             
             </div>
 
-            <div id="Progress"></div>
-
-            <div id="PlurkList"></div>
-
-            <div id="PageBar">
-            <input id="prev" 
-            data-event="ClickEvent" 
-            data-mode="PageChange" 
-            data-path="prev" disabled
-            type="button" value="上一頁">
-
-            <!--<input id="page" type="button" value="1">-->
-
-            <div id="page">
-                <select id="PageChange" data-mode="PageChange" data-event="ChangeEvent">
-                    <option>1</option>
-                </select>
-            </div>
+            <div id="BackList">${Ex.func.BackList()}</div>
 
 
-            <input id="next" 
-            data-event="ClickEvent" 
-            data-mode="PageChange" 
-            data-path="next" disabled
-            type="button" value="下一頁">
-            </div>`;
+            `;
 
+
+            document.addEventListener("click",Ex.func.ClickEvent)
+            
             
            
-            Ex.func.ChangeEvent();
-            Ex.func.ClickEvent();
+            
+            
 
             Ex.func.Block(1);
             
@@ -1350,6 +564,8 @@
     
 
     window.onload = ()=>{
+
+        
 
         Ex.init();
 

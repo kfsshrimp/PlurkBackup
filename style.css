@@ -19,13 +19,28 @@ div#SearchBar{
     padding: 4px;
 }
 
-input[type=button]{
+
+div#SearchBar input[type="text"]{
+    width: 200px;
+}
+
+div#SearchBar [type="file"]{
+    display: none;
+}
+
+
+button{
+    cursor: pointer;
+}
+button:hover{
+    background: #00f;
+    color: #fff;
+}
+button[disabled]{
     cursor: pointer;
 }
 
-input[type=button][disabled]{
-    cursor:wait;
-}
+
 
 div#PlurkList{
     max-height: 70%;
@@ -60,6 +75,63 @@ div#Progress{
     margin: 4px 20px;
     border-radius: 5px;
     color: #000;
+}
+
+div#BackList{
+
+    display: flex;
+    text-align: left;
+
+}
+
+div#BackList>div{
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+    border: 1px solid #fff;
+    margin: 5px;
+    padding: 10px;
+}
+
+div#BackList>div .content{
+    border: 1px solid #fff;
+    margin: 5px;
+    padding: 10px;
+    text-align: left;
+    height: 220px;
+    overflow: hidden;
+}
+
+div#BackList>div>button{
+    margin-left: 4px;
+}
+
+div#ReplurkDiv{
+    width: 80%;
+    height: 80%;
+    background: #555d;
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+div#ReplurkDiv>div{
+    margin-top: 10px;
+    height: 95%;
+    overflow-y: scroll;
+}
+
+
+div#ReplurkDiv .list{
+    background: #777;
+    color: #fff;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #000;
+    border-radius: 10px;
+    text-align: left;
 }
 
 
