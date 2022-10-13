@@ -305,7 +305,6 @@
                         var file = document.querySelector("#File");
                         file.addEventListener("change",r=>{
 
-                            console.log(r);
 
                             reader.readAsText(r.target.files[0]);
 
@@ -541,7 +540,7 @@
 
 
 
-                <button onclick="window.open('https://www.plurk.com/kfsshrimp4','_blank');">使用說明&問題回報</button>
+                <button onclick="window.open('https://www.plurk.com/p/p0wxtt','_blank');">使用說明&問題回報</button>
                 <input type="file" id="File">
                 
             
