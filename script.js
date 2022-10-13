@@ -255,7 +255,7 @@
                                 r = JSON.parse(r.response);
                                 
                 
-                                Ex.flag.storage.plurk[ r.responses[0].plurk_id ].Replurk = r;
+                                Ex.flag.storage.plurk[ plurk_id ].Replurk = r;
 
                                 Ex.func.StorageUpd();
 
