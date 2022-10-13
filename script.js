@@ -219,6 +219,8 @@
 
                     case "BackUp":
 
+                        console.log('backup');
+
                         var plurk_url = document.querySelector("#plurk_url").value;
 
                         var plurk_id =  parseInt(plurk_url.split("/").pop(),36);
@@ -239,6 +241,8 @@
                                 return;
                             }
 
+
+                            console.log(r);
                             
                             
                             Ex.flag.storage.plurk = Ex.flag.storage.plurk||{};
@@ -250,8 +254,7 @@
                             api.func = (r)=>{
                                 r = JSON.parse(r.response);
                                 
-                                if(r.response_count===0) return;
-                                
+                
                                 Ex.flag.storage.plurk[ r.responses[0].plurk_id ].Replurk = r;
 
                                 Ex.func.StorageUpd();
