@@ -1,5 +1,5 @@
 (()=>{
-    var Ex = {
+    Ex = {
         id:"PlurkBackup",
         config:{
             sort:{
@@ -256,7 +256,9 @@
 
                                 Ex.func.StorageUpd();
 
-                                setTimeout(()=>{location.reload();},0);
+
+                                document.querySelector("#BackList").innerHTML = Ex.func.BackList();
+
                             }
                             api.Send();
 
@@ -339,7 +341,7 @@
 
                         Ex.func.StorageUpd();
 
-                        setTimeout(()=>{location.reload();},0);
+                        document.querySelector("#BackList").innerHTML = Ex.func.BackList();
 
                     break;
 
