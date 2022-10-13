@@ -219,7 +219,7 @@
 
                     case "BackUp":
 
-                        console.log('backup');
+
 
                         var plurk_url = document.querySelector("#plurk_url").value;
 
@@ -242,8 +242,6 @@
                             }
 
 
-                            console.log(r);
-                            
                             
                             Ex.flag.storage.plurk = Ex.flag.storage.plurk||{};
                             Ex.flag.storage.plurk[ r.plurk.plurk_id ] = r;
