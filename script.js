@@ -1,5 +1,5 @@
 (()=>{
-    Ex = {
+    var Ex = {
         id:"PlurkBackup",
         config:{
             sort:{
